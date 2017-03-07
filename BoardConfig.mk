@@ -80,7 +80,7 @@ endif
 
 # Security
 BOARD_USES_SECURE_SERVICES := true
-BOARD_SEPOLICY_DIRS += $(LOCAL_PATH)/sepolicy
+BOARD_SEPOLICY_DIRS := $(LOCAL_PATH)/sepolicy
 
 # Wi-Fi
 BOARD_WLAN_DEVICE           := bcmdhd
