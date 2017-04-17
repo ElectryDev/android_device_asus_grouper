@@ -49,6 +49,10 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/gps/gps.conf:system/etc/gps.conf \
     $(LOCAL_PATH)/gps/gps.xml:system/etc/gps.xml
 
+# Hacks
+PRODUCT_PACKAGES += \
+    libnvossh
+
 # HALs
 PRODUCT_PACKAGES += \
     keystore.grouper \
