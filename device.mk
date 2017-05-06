@@ -1,5 +1,6 @@
 #
 # Copyright (C) 2010 The Android Open Source Project
+#           (C) 2017 The LineageOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +15,17 @@
 # limitations under the License.
 #
 
-# the actual meat of the device-specific product definition
+# The actual meat of the device-specific product definition
 $(call inherit-product, device/asus/grouper/device-common.mk)
-
-PRODUCT_COPY_FILES += \
-    device/asus/grouper/rootdir/fstab.grouper:root/fstab.grouper \
-    device/asus/grouper/rootdir/init.grouper.rc:root/init.grouper.rc \
-    device/asus/grouper/rootdir/init.grouper.power.rc:root/init.grouper.power.rc \
-    device/asus/grouper/rootdir/init.grouper.sensors.rc:root/init.grouper.sensors.rc
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.carrier=wifi-only
 
 DEVICE_PACKAGE_OVERLAYS += \
     device/asus/grouper/overlay
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/rootdir/fstab.grouper:root/fstab.grouper \
+    $(LOCAL_PATH)/rootdir/init.grouper.rc:root/init.grouper.rc \
+    $(LOCAL_PATH)/rootdir/init.grouper.power.rc:root/init.grouper.power.rc \
+    $(LOCAL_PATH)/rootdir/init.grouper.sensors.rc:root/init.grouper.sensors.rc
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.carrier=wifi-only
