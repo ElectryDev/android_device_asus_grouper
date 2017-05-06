@@ -1,17 +1,18 @@
-# EGL
+# Display & Graphics
+ro.sf.lcd_density=213
 ro.opengles.version=131072
 debug.hwui.render_dirty_regions=false
-persist.tegra.nvmmlite=1
-
-# Don't preload OpenGL in Zygote, the Tegra drivers do not like it
-ro.zygote.disable_gl_preload=true
-
-# Set default LCD density to TVDPI
-ro.sf.lcd_density=213
-
-# Wi-Fi
-wifi.interface=wlan0
 
 # Configure PRISM, but disable it by default
 persist.tegra.didim.video=5
 persist.tegra.didim.enable=0
+
+# Don't preload OpenGL in Zygote, the Tegra drivers do not like it
+ro.zygote.disable_gl_preload=true
+
+# Media
+persist.tegra.nvmmlite=1
+
+# Wi-Fi
+wifi.interface=wlan0
+
