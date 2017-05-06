@@ -36,15 +36,7 @@ BOARD_FLASH_BLOCK_SIZE := 4096
 
 # TWRP Support - Optional
 ifeq ($(WITH_TWRP),true)
-PRODUCT_COPY_FILES += \
-    device/asus/grouper/twrp.fstab:recovery/root/etc/twrp.fstab
-RECOVERY_VARIANT := twrp
-TW_THEME := portrait_hdpi
-BOARD_HAS_NO_REAL_SDCARD := true
-TW_BRIGHTNESS_PATH := /sys/devices/platform/pwm-backlight/backlight/pwm-backlight/brightness
-RECOVERY_SDCARD_ON_DATA := true
-TW_NO_USB_STORAGE := false
-TW_INCLUDE_L_CRYPTO := true
+-include device/asus/grouper/twrp.mk
 endif
 
 # Disable journaling on system.img to save space

@@ -1,5 +1,4 @@
-# mount point	fstype		device
-#twrp.fstab
+# mount point	fstype		device						flags
 /system		ext4		/dev/block/platform/sdhci-tegra.3/by-name/APP
 /cache		ext4		/dev/block/platform/sdhci-tegra.3/by-name/CAC
 /data		ext4		/dev/block/platform/sdhci-tegra.3/by-name/UDA	flags=encryptable=/dev/block/platform/sdhci-tegra.3/by-name/MDA
