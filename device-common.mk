@@ -18,9 +18,8 @@ PRODUCT_CHARACTERISTICS := tablet,nosdcard
 
 PRODUCT_AAPT_CONFIG := normal
 PRODUCT_AAPT_PREF_CONFIG := hdpi
-
-# Pull in AOSP base
-$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
+TARGET_SCREEN_HEIGHT := 1280
+TARGET_SCREEN_WIDTH := 800
 
 # Dalvik VM config
 $(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
