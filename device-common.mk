@@ -33,6 +33,10 @@ PRODUCT_COPY_FILES += \
 TARGET_SCREEN_HEIGHT := 1280
 TARGET_SCREEN_WIDTH := 800
 
+# Camera
+PRODUCT_PACKAGES += \
+    Snap
+
 # Dalvik VM config
 $(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
 
