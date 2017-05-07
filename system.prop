@@ -11,6 +11,8 @@ persist.tegra.didim.enable=0
 ro.zygote.disable_gl_preload=true
 
 # Media
+media.stagefright.legacyencoder=1
+media.stagefright.less-secure=1
 persist.tegra.nvmmlite=1
 
 # Wi-Fi
