@@ -1,0 +1,3 @@
+allow bootanim gpu_device:chr_file ioctl;
+
+allow bootanim sysfs_modules_tegrafuse:file r_file_perms;

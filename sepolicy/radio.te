@@ -1,0 +1,3 @@
+allow radio gpu_device:chr_file rw_file_perms;
+
+allow radio sysfs_modules_tegrafuse:file r_file_perms;

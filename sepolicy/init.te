@@ -1,0 +1,5 @@
+# Allow creating /sdcard symlinks
+allow init tmpfs:lnk_file create_file_perms;
+
+# Allow writing /sys/kernel/debug/scaling/use_throughput_hint
+allow init debugfs_pmqos:file w_file_perms;
