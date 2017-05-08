@@ -38,7 +38,7 @@ PRODUCT_PACKAGES += \
     Snap
 
 # Dalvik VM config
-$(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
+$(call inherit-product, frameworks/native/build/tablet-dalvik-heap.mk)
 
 # Display
 PRODUCT_AAPT_CONFIG := normal
