@@ -1,3 +1,6 @@
+# ActivityManager
+ro.config.max_starting_bg=2
+
 # Display & Graphics
 ro.sf.lcd_density=213
 ro.opengles.version=131072
