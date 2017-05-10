@@ -47,6 +47,9 @@ BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(LOCAL_PATH)/bluetooth
 # Camera
 TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 
+# CM Hardware
+BOARD_HARDWARE_CLASS := $(LOCAL_PATH)/cmhw
+
 # Dump State
 BOARD_HAL_STATIC_LIBRARIES := libdumpstate.grouper
 
