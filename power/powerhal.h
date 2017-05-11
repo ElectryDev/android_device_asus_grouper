@@ -15,29 +15,16 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_POWER_HAL_H
-#define COMMON_POWER_HAL_H
+#ifndef _POWER_HAL_H_
+#define _POWER_HAL_H_
 
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
 #include "powerhal_utils.h"
-#include "timeoutpoker.h"
+
 #include <semaphore.h>
 #include <stdlib.h>
-
-#define MAX_CHARS 32
-#define MAX_INPUT_DEV_COUNT 12
-#define MAX_USE_CASE_STRING_SIZE 80
-// This needs set to the largest power hint in the enum in hardware/power.h
-#define MAX_POWER_HINT_COUNT POWER_HINT_LOW_POWER
-
-#define DEFAULT_MIN_ONLINE_CPUS     2
-#define DEFAULT_MAX_ONLINE_CPUS     4
-#define DEFAULT_FREQ                700
-
-#define POWER_CAP_PROP "persist.sys.NV_PBC_PWR_LIMIT"
-#define SLEEP_INTERVAL_SECS 1
 
 struct input_dev_map {
     int dev_id;
@@ -45,21 +32,12 @@ struct input_dev_map {
 };
 
 struct powerhal_info {
-    TimeoutPoker* mTimeoutPoker;
-
-    int *available_frequencies;
-    int num_available_frequencies;
+    /* Maximum CPU frequency */
+    int max_frequency;
+    bool is_overclocked;
 
     /* Maximum LP CPU frequency */
     int lp_max_frequency;
-
-    /* Maximum CPU frequency */
-    int max_frequency;
-
-    int interaction_boost_frequency;
-    int animation_boost_frequency;
-
-    bool ftrace_enable;
 
     /* Number of devices requesting Power HAL service */
     int input_cnt;
@@ -67,57 +45,137 @@ struct powerhal_info {
     /* Holds input devices */
     struct input_dev_map* input_devs;
 
-    /* Time last hint was sent - in usec */
-    uint64_t hint_time[MAX_POWER_HINT_COUNT];
-    uint64_t hint_interval[MAX_POWER_HINT_COUNT];
+    int boostpulse_fd;
 
-    /* waiting condvar regular hints thread */
-    pthread_cond_t wait_cond;
-
-    /* waiting mutex regular hints thread */
-    pthread_mutex_t wait_mutex;
-
-    /* regular hints thread handle */
-    pthread_t regular_hints_thread;
-
-    /* regular hints thread handle */
-    bool exit_hints_thread;
-
-    /* Features on platform */
-    struct {
-        bool fan;
-    } features;
-
-    /* File descriptors used for hints and app profiles */
-    struct {
-        int interactive_max_cpus;
-    } fds;
-
+    int current_power_profile;
 };
 
-/* Opens power hw module */
-void common_power_open(struct powerhal_info *pInfo);
+enum {
+    PROFILE_POWER_SAVE = 0,
+    PROFILE_BALANCED,
+    PROFILE_HIGH_PERFORMANCE,
+    PROFILE_BIAS_POWER_SAVE,
+    PROFILE_BIAS_PERFORMANCE,
+    PROFILE_MAX
+};
 
-/* Power management setup action at startup.
- * Such as to set default cpufreq parameters.
- */
-void common_power_init(struct power_module *module, struct powerhal_info *pInfo);
+typedef struct governor_settings {
+    /* interactive */
+    int boostpulse_duration;
+    int go_hispeed_load;
+    int go_hispeed_load_off;
+    int hispeed_freq;
+    int hispeed_freq_oc;
+    int hispeed_freq_off;
+    int io_is_busy;
+    int min_sample_time;
+    char *target_loads;
+    char *target_loads_off;
+    /* cpu */
+    int max_cpu_freq;
+    int min_cpu_freq;
+    int min_cpu_freq_off;
+    int max_cpu_online;
+    int min_cpu_online;
+} power_profile;
 
-/* Power management action,
- * upon the system entering interactive state and ready for interaction,
- * often with UI devices
- * OR
- * non-interactive state the system appears asleep, displayi/touch usually turned off.
-*/
-void common_power_set_interactive(struct power_module *module,
-                                    struct powerhal_info *pInfo, int on);
+static power_profile profiles[PROFILE_MAX] = {
+    [PROFILE_POWER_SAVE] = {
+        /* interactive */
+        .boostpulse_duration =    0,
+        .go_hispeed_load =        95,
+        .go_hispeed_load_off =    95,
+        .hispeed_freq =           760000,
+        .hispeed_freq_oc =        760000,
+        .hispeed_freq_off =       760000,
+        .io_is_busy =             0,
+        .min_sample_time =        60000,
+        .target_loads =           "95",
+        .target_loads_off =       "95",
+        /* cpu */
+        .max_cpu_freq =           1100000,
+        .min_cpu_freq =           51000,
+        .min_cpu_freq_off =       51000,
+        .max_cpu_online =         2,
+        .min_cpu_online =         1,
+    },
+    [PROFILE_BALANCED] = {
+        /* interactive */
+        .boostpulse_duration =    200000,
+        .go_hispeed_load =        95,
+        .go_hispeed_load_off =    95,
+        .hispeed_freq =           1000000,
+        .hispeed_freq_oc =        1200000,
+        .hispeed_freq_off =       760000,
+        .io_is_busy =             1,
+        .min_sample_time =        40000,
+        .target_loads =           "70 1200000:80 1300000:85 1400000:90",
+        .target_loads_off =       "90 1200000:99",
+        /* cpu */
+        .max_cpu_freq =           -1,
+        .min_cpu_freq =           51000,
+        .min_cpu_freq_off =       51000,
+        .max_cpu_online =         4,
+        .min_cpu_online =         1,
+    },
+    [PROFILE_HIGH_PERFORMANCE] = {
+        /* interactive */
+        .boostpulse_duration =    1000000,
+        .go_hispeed_load =        75,
+        .go_hispeed_load_off =    75,
+        .hispeed_freq =           1200000,
+        .hispeed_freq_oc =        1400000,
+        .hispeed_freq_off =       1000000,
+        .io_is_busy =             1,
+        .min_sample_time =        40000,
+        .target_loads =           "70",
+        .target_loads_off =       "70",
+        /* cpu */
+        .max_cpu_freq =           -1,
+        .min_cpu_freq =           1000000,
+        .min_cpu_freq_off =       475000,
+        .max_cpu_online =         4,
+        .min_cpu_online =         4,
+    },
+    [PROFILE_BIAS_POWER_SAVE] = {
+        /* interactive */
+        .boostpulse_duration =    100000,
+        .go_hispeed_load =        95,
+        .go_hispeed_load_off =    95,
+        .hispeed_freq =           860000,
+        .hispeed_freq_oc =        1100000,
+        .hispeed_freq_off =       640000,
+        .io_is_busy =             1,
+        .min_sample_time =        40000,
+        .target_loads =           "70 1200000:85 1300000:90 1400000:95",
+        .target_loads_off =       "95",
+        /* cpu */
+        .max_cpu_freq =           -1,
+        .min_cpu_freq =           51000,
+        .min_cpu_freq_off =       51000,
+        .max_cpu_online =         4,
+        .min_cpu_online =         1,
+    },
+    [PROFILE_BIAS_PERFORMANCE] = {
+        /* interactive */
+        .boostpulse_duration =    500000,
+        .go_hispeed_load =        90,
+        .go_hispeed_load_off =    90,
+        .hispeed_freq =           1100000,
+        .hispeed_freq_oc =        1300000,
+        .hispeed_freq_off =       860000,
+        .io_is_busy =             1,
+        .min_sample_time =        40000,
+        .target_loads =           "70 1200000:75 1300000:80 1400000:90",
+        .target_loads_off =       "90",
+        /* cpu */
+        .max_cpu_freq =           -1,
+        .min_cpu_freq =           51000,
+        .min_cpu_freq_off =       51000,
+        .max_cpu_online =         4,
+        .min_cpu_online =         2,
+    },
+};
 
-/* PowerHint called to pass hints on power requirements, which
- * may result in adjustment of power/performance parameters of the
- * cpufreq governor and other controls.
-*/
-void common_power_hint(struct power_module *module, struct powerhal_info *pInfo,
-                            power_hint_t hint, void *data);
-
-#endif  //COMMON_POWER_HAL_H
+#endif
 
